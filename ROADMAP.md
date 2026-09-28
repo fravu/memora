@@ -23,17 +23,21 @@ Unit-Tests laufen grün. **Phase 0 abgeschlossen.**
 
 ---
 
-## Phase 1 – MVP Kernfunktionen
+## Phase 1 – MVP Kernfunktionen ✅
 **Features:** #1 Flashcards, #3 eigene Decks, #11 Offline, #14 Kontextsätze
 **Ziel:** Nutzer kann eigene Vokabellisten anlegen und als Karteikarten durchgehen.
 
-- ⬜ Deck-CRUD (anlegen, umbenennen, löschen)
-- ⬜ Vokabel-CRUD innerhalb eines Decks (Wort, Übersetzung, optional Beispielsatz)
-- ⬜ Flashcard-Screen: Karte anzeigen → umdrehen → nächste Karte
-- ⬜ Alles rein lokal (Drift), keine Netzwerkabhängigkeit
+- ✅ Deck-CRUD (anlegen, umbenennen, löschen)
+- ✅ Vokabel-CRUD innerhalb eines Decks (Wort, Übersetzung, optional Beispielsatz)
+- ✅ Flashcard-Screen: Karte anzeigen → umdrehen → nächste Karte
+- ✅ Alles rein lokal (Drift), keine Netzwerkabhängigkeit
 
 **Deliverable:** App ist ohne Internet nutzbar, eigene Listen erstellbar und abfragbar.
 **Aufwand:** 🟢 Niedrig–Mittel
+**Status:** Auf echtem Android-Gerät getestet (APK per lokalem HTTP-Server übertragen,
+kein USB/Emulator nötig) — Deck anlegen, Vokabeln pflegen und Flashcards durchgehen
+funktionieren. Cascade-Delete (Deck löschen → Vokabeln + Lernstand mitgelöscht) ist
+per SQLite-Foreign-Keys abgesichert und getestet.
 
 ---
 

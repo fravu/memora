@@ -131,5 +131,8 @@ Cloud-Sync (Feature #12) ist bewusst als spätere, optionale Erweiterung geplant
 | 2026-09-28 | Drift (SQLite) statt Cloud-DB für MVP | Offline-first, kein Backend-Aufwand in MVP nötig |
 | 2026-09-28 | SM-2 als SRS-Algorithmus | Gut dokumentiert, deterministisch, einfach testbar |
 | 2026-09-28 | Riverpod als State Management | Testbarkeit, geringe Boilerplate |
+| 2026-09-29 | Kein separates `application/usecases` für reines CRUD in Phase 1 | Vermeidet Pass-Through-Boilerplate (Usecase ruft nur 1:1 Repository auf); die Schicht bleibt für echte Logik (SM-2-Scheduler, Review-Session-Orchestrierung) in Phase 2 reserviert |
+| 2026-09-29 | Foreign-Key-Cascade-Delete (`onDelete: KeyAction.cascade`) auf `Vocabs.deckId` und `CardProgresses.vocabId`, plus `PRAGMA foreign_keys = ON` in `MigrationStrategy.beforeOpen` | Deck löschen soll automatisch Vokabeln + Lernstand mitlöschen, ohne das manuell in jedem Repository nachzubauen |
+| 2026-09-29 | `addVocab` legt sofort eine `CardProgress`-Zeile an | Jede Vokabel ist ab Erstellung SRS-fähig (Phase 2), ohne nachträgliche Backfill-Migration |
 
 *(Dieses Log wird bei jeder weiteren architektonisch relevanten Entscheidung ergänzt.)*

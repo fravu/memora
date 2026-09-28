@@ -381,7 +381,7 @@ class $VocabsTable extends Vocabs with TableInfo<$VocabsTable, Vocab> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES decks (id)',
+      'REFERENCES decks (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _termMeta = const VerificationMeta('term');
@@ -848,7 +848,7 @@ class $CardProgressesTable extends CardProgresses
     type: DriftSqlType.int,
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'UNIQUE REFERENCES vocabs (id)',
+      'UNIQUE REFERENCES vocabs (id) ON DELETE CASCADE',
     ),
   );
   static const VerificationMeta _easeFactorMeta = const VerificationMeta(
@@ -1661,6 +1661,23 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cardProgresses,
     statsSnapshots,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'decks',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('vocabs', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'vocabs',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('card_progresses', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$DecksTableCreateCompanionBuilder = DecksCompanion Function({

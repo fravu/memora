@@ -10,7 +10,8 @@ class Decks extends Table {
 
 class Vocabs extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get deckId => integer().references(Decks, #id)();
+  IntColumn get deckId =>
+      integer().references(Decks, #id, onDelete: KeyAction.cascade)();
   TextColumn get term => text()();
   TextColumn get translation => text()();
   TextColumn get exampleSentence => text().nullable()();
@@ -20,8 +21,9 @@ class Vocabs extends Table {
 
 class CardProgresses extends Table {
   IntColumn get id => integer().autoIncrement()();
-  IntColumn get vocabId =>
-      integer().references(Vocabs, #id).unique()();
+  IntColumn get vocabId => integer()
+      .references(Vocabs, #id, onDelete: KeyAction.cascade)
+      .unique()();
   RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
   IntColumn get intervalDays => integer().withDefault(const Constant(0))();
   IntColumn get repetitions => integer().withDefault(const Constant(0))();
