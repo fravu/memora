@@ -17,9 +17,9 @@ Status-Legende: ⬜ offen · 🟨 in Arbeit · ✅ erledigt
 - ✅ Git-Repo initialisieren
 
 **Deliverable:** Leere App startet auf Emulator/Simulator, DB-Migration läuft.
-**Status:** Android-Build musste wegen zu geringem RAM (2.8GB) pausiert werden;
-`org.gradle.jvmargs` wurde auf 2G/1G reduziert und Swap wird vom Nutzer vergrößert.
-Ein tatsächlicher Geräte-/Emulator-Testlauf steht noch aus.
+**Status:** ✅ Debug-APK-Build erfolgreich (`flutter build apk --debug`), nach RAM-Erhöhung
+auf ~4.7GB und Reduzierung von `org.gradle.jvmargs` auf 2G/1G. `flutter analyze` und alle
+Unit-Tests laufen grün. **Phase 0 abgeschlossen.**
 
 ---
 
