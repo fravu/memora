@@ -57,18 +57,22 @@ per SQLite-Foreign-Keys abgesichert und getestet.
 
 ---
 
-## Phase 3 – Engagement & Gewohnheit
+## Phase 3 – Engagement & Gewohnheit ✅
 **Features:** #6 TTS-Aussprache, #9 Gamification, #13 Push-Erinnerungen
 **Ziel:** Nutzer bleibt dran (Motivation, Habit-Building).
 
-- ⬜ TTS-Integration (`flutter_tts`) auf Flashcard- und Review-Screen
-- ⬜ Streak-Zähler + `StatsSnapshot`-Fortschreibung
-- ⬜ XP/Level-System für abgeschlossene Reviews (einfache Formel, kein Overengineering)
-- ⬜ Statistik-Screen mit Streak, gelernten Wörtern, Erfolgsquote (fl_chart)
-- ⬜ Lokale Push-Notification "Zeit zum Lernen" (konfigurierbare Uhrzeit)
+- ✅ TTS-Integration (`flutter_tts`) auf dem Flashcard-Screen (Lautsprecher-Icon,
+  spricht Vorder-/Rückseite in der jeweiligen Deck-Sprache)
+- ✅ Streak-Zähler + `StatsSnapshot`-Fortschreibung (pro Review, mit Tages-Upsert)
+- ✅ XP/Level-System (10 XP richtig / 2 XP falsch, alle 100 XP ein Level)
+- ✅ Statistik-Screen mit Streak, Level/XP-Fortschritt, Erfolgsquote, 7-Tage-Balkendiagramm (fl_chart)
+- ✅ Lokale Erinnerung (`flutter_local_notifications`) mit wählbarer Uhrzeit in den Einstellungen
 
 **Deliverable:** App fühlt sich nach täglicher Lerngewohnheit an, nicht nur nach Tool.
 **Aufwand:** 🟡 Mittel
+**Status:** Debug-APK-Build erfolgreich (musste `isCoreLibraryDesugaringEnabled`
+für `flutter_local_notifications` aktivieren). 18 zusätzliche Tests (Unit + Widget)
+für XP-Formel, Streak-Logik und die drei neuen/geänderten Screens.
 
 ---
 

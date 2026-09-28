@@ -68,10 +68,22 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  _flipped ? vocab.translation : vocab.term,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                  textAlign: TextAlign.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        _flipped ? vocab.translation : vocab.term,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.volume_up),
+                      tooltip: 'Vorlesen',
+                      onPressed: () => _speak(vocab),
+                    ),
+                  ],
                 ),
                 if (_flipped && vocab.exampleSentence != null) ...[
                   const SizedBox(height: 12),
@@ -123,5 +135,11 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
 
   Future<void> _rate(Vocab vocab, ReviewRating rating) async {
     await ref.read(reviewVocabUseCaseProvider).call(vocab.id, rating);
+  }
+
+  Future<void> _speak(Vocab vocab) async {
+    final text = _flipped ? vocab.translation : vocab.term;
+    final languageCode = _flipped ? widget.deck.targetLang : widget.deck.sourceLang;
+    await ref.read(ttsServiceProvider).speak(text, languageCode: languageCode);
   }
 }

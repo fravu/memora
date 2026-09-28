@@ -136,5 +136,9 @@ Cloud-Sync (Feature #12) ist bewusst als spätere, optionale Erweiterung geplant
 | 2026-09-29 | `addVocab` legt sofort eine `CardProgress`-Zeile an | Jede Vokabel ist ab Erstellung SRS-fähig (Phase 2), ohne nachträgliche Backfill-Migration |
 | 2026-09-29 | Review-Session zeigt immer nur `vocabs.first` aus dem reaktiven "fällige Karten"-Stream statt einen manuellen Index zu pflegen | Nach einer Bewertung verschwindet die Karte automatisch aus dem Due-Stream (dueDate in der Zukunft) — kein manuelles Queue-Management nötig, Drift-Reaktivität übernimmt das |
 | 2026-09-29 | Vereinfachte SM-2-Variante mit 4 Stufen (wieder/schwer/gut/leicht) statt der klassischen 0–5-Skala | Anki-Style ist für Endnutzer verständlicher; Kernidee (Ease-Factor, wachsendes Intervall) bleibt identisch zu SM-2 |
+| 2026-09-29 | XP/Level/Streak rein aus `StatsSnapshot`-Historie abgeleitet (keine eigene XP-Spalte/Tabelle) | Kein Overengineering — ein Aggregations-Query reicht, keine zusätzliche Migration nötig |
+| 2026-09-29 | `shared_preferences` statt Drift-Tabelle für die Erinnerungszeit | Für 2 einfache Werte (Stunde/Minute) ist eine eigene DB-Tabelle unverhältnismäßig; SharedPreferences ist der Flutter-Standardweg für simple Key-Value-Einstellungen |
+| 2026-09-29 | Zeitzone für `flutter_local_notifications` aus `DateTime.now().timeZoneOffset` abgeleitet statt eigenem Geräte-Zeitzone-Plugin | Vermeidet eine zusätzliche Abhängigkeit nur für die Erinnerungsfunktion; Einschränkung: `Etc/GMT`-Zonen kennen keine Sommerzeit — bei DST-Wechsel verschiebt sich die Erinnerung bis zum nächsten App-Start um 1h |
+| 2026-09-29 | `isCoreLibraryDesugaringEnabled` in `android/app/build.gradle.kts` aktiviert | Pflicht-Voraussetzung von `flutter_local_notifications`; ohne das schlägt der Android-Build fehl |
 
 *(Dieses Log wird bei jeder weiteren architektonisch relevanten Entscheidung ergänzt.)*

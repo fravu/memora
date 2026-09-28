@@ -5,6 +5,7 @@ import 'package:memora/application/usecases/review_vocab_usecase.dart';
 import 'package:memora/data/drift/database.dart';
 import 'package:memora/data/repositories_impl/drift_card_progress_repository.dart';
 import 'package:memora/data/repositories_impl/drift_deck_repository.dart';
+import 'package:memora/data/repositories_impl/drift_stats_repository.dart';
 import 'package:memora/data/repositories_impl/drift_vocab_repository.dart';
 import 'package:memora/domain/entities/card_progress.dart';
 import 'package:memora/domain/entities/review_rating.dart';
@@ -14,12 +15,14 @@ void main() {
   late DriftDeckRepository deckRepo;
   late DriftVocabRepository vocabRepo;
   late DriftCardProgressRepository progressRepo;
+  late DriftStatsRepository statsRepo;
 
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     deckRepo = DriftDeckRepository(db);
     vocabRepo = DriftVocabRepository(db);
     progressRepo = DriftCardProgressRepository(db);
+    statsRepo = DriftStatsRepository(db);
   });
 
   tearDown(() => db.close());
@@ -71,7 +74,7 @@ void main() {
       translation: 'house',
     );
 
-    final useCase = ReviewVocabUseCase(progressRepo, SrsScheduler());
+    final useCase = ReviewVocabUseCase(progressRepo, SrsScheduler(), statsRepo);
     await useCase.call(vocabId, ReviewRating.good);
 
     final progress = await progressRepo.getProgress(vocabId);

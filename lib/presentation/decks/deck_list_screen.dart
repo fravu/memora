@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/deck.dart';
 import '../providers.dart';
+import '../settings/settings_screen.dart';
+import '../stats/stats_screen.dart';
 import 'deck_detail_screen.dart';
 
 class DeckListScreen extends ConsumerWidget {
@@ -13,7 +15,25 @@ class DeckListScreen extends ConsumerWidget {
     final decksAsync = ref.watch(decksProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Meine Decks')),
+      appBar: AppBar(
+        title: const Text('Meine Decks'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'Statistik',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StatsScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Einstellungen',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: decksAsync.when(
         data: (decks) {
           if (decks.isEmpty) {
