@@ -12,11 +12,14 @@ Status-Legende: ⬜ offen · 🟨 in Arbeit · ✅ erledigt
 
 - ✅ Flutter-Projekt anlegen (Android + iOS Target)
 - ✅ Ordnerstruktur gemäß `ARCHITECTURE.md` aufsetzen
-- ⬜ Drift-DB einrichten, Tabellen `Deck`, `Vocab`, `CardProgress`, `StatsSnapshot`
-- ⬜ CI-Grundgerüst (Lint + Unit-Tests) einrichten
-- ⬜ Git-Repo initialisieren
+- ✅ Drift-DB einrichten, Tabellen `Deck`, `Vocab`, `CardProgress`, `StatsSnapshot`
+- ✅ CI-Grundgerüst (Lint + Unit-Tests) einrichten
+- ✅ Git-Repo initialisieren
 
 **Deliverable:** Leere App startet auf Emulator/Simulator, DB-Migration läuft.
+**Status:** Android-Build musste wegen zu geringem RAM (2.8GB) pausiert werden;
+`org.gradle.jvmargs` wurde auf 2G/1G reduziert und Swap wird vom Nutzer vergrößert.
+Ein tatsächlicher Geräte-/Emulator-Testlauf steht noch aus.
 
 ---
 
