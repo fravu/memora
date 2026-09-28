@@ -134,5 +134,7 @@ Cloud-Sync (Feature #12) ist bewusst als spätere, optionale Erweiterung geplant
 | 2026-09-29 | Kein separates `application/usecases` für reines CRUD in Phase 1 | Vermeidet Pass-Through-Boilerplate (Usecase ruft nur 1:1 Repository auf); die Schicht bleibt für echte Logik (SM-2-Scheduler, Review-Session-Orchestrierung) in Phase 2 reserviert |
 | 2026-09-29 | Foreign-Key-Cascade-Delete (`onDelete: KeyAction.cascade`) auf `Vocabs.deckId` und `CardProgresses.vocabId`, plus `PRAGMA foreign_keys = ON` in `MigrationStrategy.beforeOpen` | Deck löschen soll automatisch Vokabeln + Lernstand mitlöschen, ohne das manuell in jedem Repository nachzubauen |
 | 2026-09-29 | `addVocab` legt sofort eine `CardProgress`-Zeile an | Jede Vokabel ist ab Erstellung SRS-fähig (Phase 2), ohne nachträgliche Backfill-Migration |
+| 2026-09-29 | Review-Session zeigt immer nur `vocabs.first` aus dem reaktiven "fällige Karten"-Stream statt einen manuellen Index zu pflegen | Nach einer Bewertung verschwindet die Karte automatisch aus dem Due-Stream (dueDate in der Zukunft) — kein manuelles Queue-Management nötig, Drift-Reaktivität übernimmt das |
+| 2026-09-29 | Vereinfachte SM-2-Variante mit 4 Stufen (wieder/schwer/gut/leicht) statt der klassischen 0–5-Skala | Anki-Style ist für Endnutzer verständlicher; Kernidee (Ease-Factor, wachsendes Intervall) bleibt identisch zu SM-2 |
 
 *(Dieses Log wird bei jeder weiteren architektonisch relevanten Entscheidung ergänzt.)*

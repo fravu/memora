@@ -41,14 +41,15 @@ per SQLite-Foreign-Keys abgesichert und getestet.
 
 ---
 
-## Phase 2 – Lern-Engine (Spaced Repetition)
+## Phase 2 – Lern-Engine (Spaced Repetition) ✅
 **Feature:** #2 SRS (SM-2)
 **Ziel:** Karten werden nach Erfolgsquote intelligent wiederholt statt zufällig.
 
-- ⬜ `SrsScheduler` (SM-2) als reine Dart-Klasse implementieren + Unit-Tests
-- ⬜ `CardProgress`-Update nach jeder Bewertung (wieder/schwer/gut/leicht)
-- ⬜ "Heute fällige Karten"-Abfrage als Haupt-Screen
-- ⬜ Review-Session-Flow (Warteschlange fälliger Karten abarbeiten)
+- ✅ `SrsScheduler` (SM-2) als reine Dart-Klasse implementiert + 16 Unit-Tests
+- ✅ `CardProgress`-Update nach jeder Bewertung (wieder/schwer/gut/leicht)
+- ✅ "Fällige Karten"-Abfrage (Join Vocabs+CardProgresses, dueDate <= jetzt)
+- ✅ Review-Session-Flow: Flashcard-Screen zeigt jeweils die fälligste Karte,
+  4 Bewertungsknöpfe, Liste aktualisiert sich reaktiv nach jeder Bewertung
 
 **Deliverable:** Tägliche Lern-Session mit spaced repetition funktioniert nachweisbar
 (Testfall: Karte "leicht" bewertet → Intervall wächst; "wieder" → Intervall sinkt).
