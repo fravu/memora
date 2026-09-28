@@ -11,7 +11,7 @@ Status-Legende: ⬜ offen · 🟨 in Arbeit · ✅ erledigt
 **Ziel:** Projekt lauffähig, Architektur & Datenmodell stehen.
 
 - ✅ Flutter-Projekt anlegen (Android + iOS Target)
-- ⬜ Ordnerstruktur gemäß `ARCHITECTURE.md` aufsetzen
+- ✅ Ordnerstruktur gemäß `ARCHITECTURE.md` aufsetzen
 - ⬜ Drift-DB einrichten, Tabellen `Deck`, `Vocab`, `CardProgress`, `StatsSnapshot`
 - ⬜ CI-Grundgerüst (Lint + Unit-Tests) einrichten
 - ⬜ Git-Repo initialisieren
