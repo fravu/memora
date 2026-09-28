@@ -10,7 +10,7 @@ Status-Legende: ⬜ offen · 🟨 in Arbeit · ✅ erledigt
 ## Phase 0 – Setup & Architektur (Fundament)
 **Ziel:** Projekt lauffähig, Architektur & Datenmodell stehen.
 
-- ⬜ Flutter-Projekt anlegen (Android + iOS Target)
+- ✅ Flutter-Projekt anlegen (Android + iOS Target)
 - ⬜ Ordnerstruktur gemäß `ARCHITECTURE.md` aufsetzen
 - ⬜ Drift-DB einrichten, Tabellen `Deck`, `Vocab`, `CardProgress`, `StatsSnapshot`
 - ⬜ CI-Grundgerüst (Lint + Unit-Tests) einrichten
