@@ -143,5 +143,9 @@ Cloud-Sync (Feature #12) ist bewusst als spätere, optionale Erweiterung geplant
 | 2026-09-29 | Gemeinsamer `runGuarded`-Helper statt einzelner try/catch pro Aufrufstelle | Wird 8× identisch gebraucht (alle Dialog-Aktionen + Review + Erinnerung) — eine kleine Abstraktion ist hier gerechtfertigt, keine Premature Abstraction |
 | 2026-09-29 | Platzhalter-App-Icon programmatisch generiert (PIL, teal + "M"-Flashcard-Motiv) statt echtes Branding zu erfinden | Ermöglicht `flutter_launcher_icons`/`flutter_native_splash`-Setup jetzt schon, ohne einen finalen Icon-Entwurf vorzutäuschen; muss vor echtem Store-Release durch richtiges Branding ersetzt werden |
 | 2026-09-29 | Release-Signing liest optional `android/key.properties` (Vorlage: `key.properties.example`), fällt ohne Datei auf Debug-Signing zurück | Lokale Release-Builds funktionieren sofort ohne Setup; echter Upload-Key kommt erst kurz vor Store-Submission dazu |
+| 2026-09-29 | MyMemory Translation API (kostenlos, kein Key) statt DeepL/Google Translate | Nutzer-Entscheidung: kein API-Key-Setup nötig, App bleibt sofort nutzbar; Qualität/Rate-Limits sind der bewusste Kompromiss, später gegen DeepL tauschbar (Interface `TranslationService` entkoppelt das) |
+| 2026-09-29 | `csv`-Package statt Handrolling für Import/Export | Robustes Escaping/Quoting (Kommas, Anführungszeichen in Vokabeln) ohne eigene Parser-Bugs |
+| 2026-09-29 | Export nutzt `share_plus` (System-Share-Sheet) statt direktem Dateisystem-Schreibzugriff | Keine Storage-Permission-Komplexität; Nutzer entscheidet selbst, wohin die CSV-Datei geht |
+| 2026-09-29 | `http`-Paket als direkte (nicht nur transitive) Abhängigkeit ergänzt | Wird direkt in `MyMemoryTranslationService` importiert — sollte nicht nur zufällig über eine andere Abhängigkeit verfügbar sein |
 
 *(Dieses Log wird bei jeder weiteren architektonisch relevanten Entscheidung ergänzt.)*

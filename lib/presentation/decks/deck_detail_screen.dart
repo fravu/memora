@@ -1,6 +1,12 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../application/io/vocab_csv_codec.dart';
 import '../../domain/entities/deck.dart';
 import '../../domain/entities/vocab.dart';
 import '../common/run_guarded.dart';
@@ -17,7 +23,24 @@ class DeckDetailScreen extends ConsumerWidget {
     final vocabsAsync = ref.watch(vocabsForDeckProvider(deck.id));
 
     return Scaffold(
-      appBar: AppBar(title: Text(deck.name)),
+      appBar: AppBar(
+        title: Text(deck.name),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'export') {
+                _exportCsv(context, ref);
+              } else if (value == 'import') {
+                _importCsv(context, ref);
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'export', child: Text('Als CSV exportieren')),
+              PopupMenuItem(value: 'import', child: Text('Aus CSV importieren')),
+            ],
+          ),
+        ],
+      ),
       body: vocabsAsync.when(
         data: (vocabs) {
           if (vocabs.isEmpty) {
@@ -88,9 +111,25 @@ class DeckDetailScreen extends ConsumerWidget {
               controller: termController,
               decoration: const InputDecoration(labelText: 'Wort'),
             ),
-            TextField(
-              controller: translationController,
-              decoration: const InputDecoration(labelText: 'Übersetzung'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: translationController,
+                    decoration: const InputDecoration(labelText: 'Übersetzung'),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.translate),
+                  tooltip: 'Automatisch übersetzen',
+                  onPressed: () => _autoTranslate(
+                    context,
+                    ref,
+                    termController,
+                    translationController,
+                  ),
+                ),
+              ],
             ),
             TextField(
               controller: exampleController,
@@ -153,9 +192,25 @@ class DeckDetailScreen extends ConsumerWidget {
               controller: termController,
               decoration: const InputDecoration(labelText: 'Wort'),
             ),
-            TextField(
-              controller: translationController,
-              decoration: const InputDecoration(labelText: 'Übersetzung'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: translationController,
+                    decoration: const InputDecoration(labelText: 'Übersetzung'),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.translate),
+                  tooltip: 'Automatisch übersetzen',
+                  onPressed: () => _autoTranslate(
+                    context,
+                    ref,
+                    termController,
+                    translationController,
+                  ),
+                ),
+              ],
             ),
             TextField(
               controller: exampleController,
@@ -197,5 +252,69 @@ class DeckDetailScreen extends ConsumerWidget {
             ),
       );
     }
+  }
+
+  Future<void> _autoTranslate(
+    BuildContext context,
+    WidgetRef ref,
+    TextEditingController termController,
+    TextEditingController translationController,
+  ) async {
+    if (termController.text.trim().isEmpty) return;
+
+    await runGuarded(context, () async {
+      final result = await ref.read(translationServiceProvider).translate(
+            termController.text.trim(),
+            sourceLang: deck.sourceLang,
+            targetLang: deck.targetLang,
+          );
+      if (result != null) {
+        translationController.text = result;
+      }
+    });
+  }
+
+  Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
+    await runGuarded(context, () async {
+      final vocabs = await ref.read(vocabRepositoryProvider).watchVocabsForDeck(deck.id).first;
+      final csv = VocabCsvCodec.encode(vocabs);
+
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/${deck.name}.csv');
+      await file.writeAsString(csv);
+
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: 'Memora-Export: ${deck.name}'),
+      );
+    });
+  }
+
+  Future<void> _importCsv(BuildContext context, WidgetRef ref) async {
+    await runGuarded(context, () async {
+      final files = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+      final path = files.isEmpty ? null : files.first.path;
+      if (path == null) return;
+
+      final content = await File(path).readAsString();
+      final drafts = VocabCsvCodec.decode(content);
+
+      final vocabRepository = ref.read(vocabRepositoryProvider);
+      for (final draft in drafts) {
+        await vocabRepository.addVocab(
+          deckId: deck.id,
+          term: draft.term,
+          translation: draft.translation,
+          exampleSentence: draft.exampleSentence,
+        );
+      }
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${drafts.length} Vokabeln importiert')),
+      );
+    });
   }
 }

@@ -99,20 +99,24 @@ Upload-Keystore erzeugen (`android/key.properties.example` → `key.properties`)
 
 ---
 
-## Phase 5 – Post-MVP-Erweiterungen (später, nicht im MVP-Scope)
+## Phase 5 – Post-MVP-Erweiterungen
 
-| Feature | Aufwand | Voraussetzung |
+| Feature | Aufwand | Status |
 |---|---|---|
-| Cloud-Sync über Geräte (#12) | 🔴 Hoch | Backend + Auth nötig |
-| Sprecherkennung/Pronunciation-Scoring (#7) | 🔴 Hoch | Speech-API/ML-Modell |
-| Community/geteilte Decks (#17) | 🔴 Hoch | Backend, Moderation, Suche |
-| Homescreen-Widget "Wort des Tages" (#16) | 🟡 Mittel | Native Widget-APIs pro Plattform |
-| Auto-Übersetzung beim Anlegen (#18) | 🟡 Mittel | Externe Translate-API, Kosten/Limits |
-| Import/Export (CSV, Anki-Format) (#10) | 🟡 Mittel | Parser pro Format |
-| Bilder/Mnemonics (#8) | 🟡 Mittel | Bildquelle + Speicherverwaltung |
+| Auto-Übersetzung beim Anlegen (#18) | 🟡 Mittel | ✅ Erledigt — MyMemory API (kostenlos, kein Key), Button im Anlegen-/Bearbeiten-Dialog |
+| Import/Export (CSV) (#10) | 🟡 Mittel | ✅ Erledigt — CSV-Export via Share-Sheet, Import via Dateiauswahl, im Deck-Menü |
+| Cloud-Sync über Geräte (#12) | 🔴 Hoch | Offen — Backend + Auth nötig |
+| Sprecherkennung/Pronunciation-Scoring (#7) | 🔴 Hoch | Offen — Speech-API/ML-Modell |
+| Community/geteilte Decks (#17) | 🔴 Hoch | Offen — Backend, Moderation, Suche |
+| Homescreen-Widget "Wort des Tages" (#16) | 🟡 Mittel | Offen — Native Widget-APIs pro Plattform |
+| Anki-Format-Import (statt nur CSV) | 🟡 Mittel | Offen — .apkg ist ein SQLite-in-ZIP-Format, eigener Parser nötig |
+| Bilder/Mnemonics (#8) | 🟡 Mittel | Offen — Bildquelle + Speicherverwaltung |
 
-Diese werden erst nach validiertem MVP priorisiert, um Aufwand nicht in Features zu
-stecken, bevor Kernnutzen (täglich Vokabeln lernen) bewiesen ist.
+**CSV-Format:** `term,translation,exampleSentence` mit Kopfzeile (Kopfzeile beim
+Import optional — wird automatisch erkannt). Export nutzt das System-Share-Sheet,
+damit der Nutzer selbst wählt, wohin die Datei geht (Downloads, Cloud, andere App).
+
+Die verbleibenden Punkte werden erst bei Bedarf priorisiert.
 
 ---
 

@@ -19,6 +19,8 @@ import '../domain/repositories/stats_repository.dart';
 import '../domain/repositories/vocab_repository.dart';
 import '../infrastructure/notifications/local_notification_service.dart';
 import '../infrastructure/notifications/notification_service.dart';
+import '../infrastructure/translation/my_memory_translation_service.dart';
+import '../infrastructure/translation/translation_service.dart';
 import '../infrastructure/tts/flutter_tts_service.dart';
 import '../infrastructure/tts/tts_service.dart';
 
@@ -91,4 +93,8 @@ final gamificationSummaryProvider = Provider<AsyncValue<GamificationSummary>>((r
 
 final onboardingCompleteProvider = FutureProvider<bool>((ref) {
   return ref.watch(settingsRepositoryProvider).hasCompletedOnboarding();
+});
+
+final translationServiceProvider = Provider<TranslationService>((ref) {
+  return MyMemoryTranslationService();
 });
