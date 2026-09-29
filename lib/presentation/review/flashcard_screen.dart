@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/deck.dart';
@@ -22,40 +23,57 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   int? _lastVocabId;
 
   @override
+  void initState() {
+    super.initState();
+    // Blendet die System-Navigationsleiste waehrend der Lern-Session aus,
+    // damit sie die Bewertungsknoepfe am unteren Rand nicht mehr ueberdeckt.
+    // Ein Wisch vom Rand holt sie bei Bedarf kurz zurueck.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final vocabsAsync = ref.watch(dueVocabsForDeckProvider(widget.deck.id));
 
     return Scaffold(
       appBar: AppBar(title: Text('${widget.deck.name} – Karten')),
-      body: vocabsAsync.when(
-        data: (vocabs) {
-          if (vocabs.isEmpty) {
-            return const Center(
-              child: Text('Keine fälligen Karten. Gut gemacht!'),
+      body: SafeArea(
+        child: vocabsAsync.when(
+          data: (vocabs) {
+            if (vocabs.isEmpty) {
+              return const Center(
+                child: Text('Keine fälligen Karten. Gut gemacht!'),
+              );
+            }
+
+            final vocab = vocabs.first;
+            if (vocab.id != _lastVocabId) {
+              _lastVocabId = vocab.id;
+              _flipped = false;
+            }
+
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              child: Column(
+                children: [
+                  Text('${vocabs.length} fällig'),
+                  const SizedBox(height: 16),
+                  Expanded(child: _buildCard(context, vocab)),
+                  const SizedBox(height: 16),
+                  if (_flipped) _buildRatingButtons(vocab) else _buildFlipButton(),
+                ],
+              ),
             );
-          }
-
-          final vocab = vocabs.first;
-          if (vocab.id != _lastVocabId) {
-            _lastVocabId = vocab.id;
-            _flipped = false;
-          }
-
-          return Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Text('${vocabs.length} fällig'),
-                const SizedBox(height: 16),
-                Expanded(child: _buildCard(context, vocab)),
-                const SizedBox(height: 16),
-                if (_flipped) _buildRatingButtons(vocab) else _buildFlipButton(),
-              ],
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Fehler: $error')),
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(child: Text('Fehler: $error')),
+        ),
       ),
     );
   }
@@ -109,29 +127,78 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   Widget _buildFlipButton() {
-    return ElevatedButton(
-      onPressed: () => setState(() => _flipped = true),
-      child: const Text('Umdrehen'),
+    return SizedBox(
+      width: double.infinity,
+      height: 64,
+      child: ElevatedButton(
+        onPressed: () => setState(() => _flipped = true),
+        style: const ButtonStyle(
+          textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 18)),
+        ),
+        child: const Text('Umdrehen'),
+      ),
     );
   }
 
   Widget _buildRatingButtons(Vocab vocab) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _ratingButton('Wieder', Colors.red, () => _rate(vocab, ReviewRating.again)),
-        _ratingButton('Schwer', Colors.orange, () => _rate(vocab, ReviewRating.hard)),
-        _ratingButton('Gut', Colors.green, () => _rate(vocab, ReviewRating.good)),
-        _ratingButton('Leicht', Colors.blue, () => _rate(vocab, ReviewRating.easy)),
+        Row(
+          children: [
+            Expanded(
+              child: _ratingButton(
+                'Wieder',
+                Colors.red,
+                () => _rate(vocab, ReviewRating.again),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ratingButton(
+                'Schwer',
+                Colors.orange,
+                () => _rate(vocab, ReviewRating.hard),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _ratingButton(
+                'Gut',
+                Colors.green,
+                () => _rate(vocab, ReviewRating.good),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _ratingButton(
+                'Leicht',
+                Colors.blue,
+                () => _rate(vocab, ReviewRating.easy),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 
   Widget _ratingButton(String label, Color color, VoidCallback onPressed) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
-      onPressed: _rating ? null : onPressed,
-      child: Text(label),
+    return SizedBox(
+      height: 64,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        onPressed: _rating ? null : onPressed,
+        child: Text(label),
+      ),
     );
   }
 
