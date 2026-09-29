@@ -13,6 +13,8 @@ import '../common/run_guarded.dart';
 import '../providers.dart';
 import '../review/flashcard_screen.dart';
 
+typedef _VocabFormResult = ({String term, String translation, String? exampleSentence});
+
 class DeckDetailScreen extends ConsumerWidget {
   const DeckDetailScreen({super.key, required this.deck});
 
@@ -96,78 +98,26 @@ class DeckDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _showCreateDialog(BuildContext context, WidgetRef ref) async {
-    final termController = TextEditingController();
-    final translationController = TextEditingController();
-    final exampleController = TextEditingController();
-
-    final created = await showDialog<bool>(
+    final result = await showDialog<_VocabFormResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Neue Vokabel'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: termController,
-              decoration: const InputDecoration(labelText: 'Wort'),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: translationController,
-                    decoration: const InputDecoration(labelText: 'Übersetzung'),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.translate),
-                  tooltip: 'Automatisch übersetzen',
-                  onPressed: () => _autoTranslate(
-                    context,
-                    ref,
-                    termController,
-                    translationController,
-                  ),
-                ),
-              ],
-            ),
-            TextField(
-              controller: exampleController,
-              decoration: const InputDecoration(
-                labelText: 'Beispielsatz (optional)',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Anlegen'),
-          ),
-        ],
+      builder: (_) => _VocabFormDialog(
+        deck: deck,
+        title: 'Neue Vokabel',
+        confirmLabel: 'Anlegen',
       ),
     );
+    if (result == null) return;
 
-    if (created == true &&
-        termController.text.trim().isNotEmpty &&
-        translationController.text.trim().isNotEmpty) {
-      if (!context.mounted) return;
-      await runGuarded(
-        context,
-        () => ref.read(vocabRepositoryProvider).addVocab(
-              deckId: deck.id,
-              term: termController.text.trim(),
-              translation: translationController.text.trim(),
-              exampleSentence: exampleController.text.trim().isEmpty
-                  ? null
-                  : exampleController.text.trim(),
-            ),
-      );
-    }
+    if (!context.mounted) return;
+    await runGuarded(
+      context,
+      () => ref.read(vocabRepositoryProvider).addVocab(
+            deckId: deck.id,
+            term: result.term,
+            translation: result.translation,
+            exampleSentence: result.exampleSentence,
+          ),
+    );
   }
 
   Future<void> _showEditDialog(
@@ -175,103 +125,34 @@ class DeckDetailScreen extends ConsumerWidget {
     WidgetRef ref,
     Vocab vocab,
   ) async {
-    final termController = TextEditingController(text: vocab.term);
-    final translationController =
-        TextEditingController(text: vocab.translation);
-    final exampleController =
-        TextEditingController(text: vocab.exampleSentence ?? '');
-
-    final saved = await showDialog<bool>(
+    final result = await showDialog<_VocabFormResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Vokabel bearbeiten'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: termController,
-              decoration: const InputDecoration(labelText: 'Wort'),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: translationController,
-                    decoration: const InputDecoration(labelText: 'Übersetzung'),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.translate),
-                  tooltip: 'Automatisch übersetzen',
-                  onPressed: () => _autoTranslate(
-                    context,
-                    ref,
-                    termController,
-                    translationController,
-                  ),
-                ),
-              ],
-            ),
-            TextField(
-              controller: exampleController,
-              decoration: const InputDecoration(
-                labelText: 'Beispielsatz (optional)',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Speichern'),
-          ),
-        ],
+      builder: (_) => _VocabFormDialog(
+        deck: deck,
+        initialTerm: vocab.term,
+        initialTranslation: vocab.translation,
+        initialExample: vocab.exampleSentence ?? '',
+        title: 'Vokabel bearbeiten',
+        confirmLabel: 'Speichern',
       ),
     );
+    if (result == null) return;
 
-    if (saved == true) {
-      if (!context.mounted) return;
-      await runGuarded(
-        context,
-        () => ref.read(vocabRepositoryProvider).updateVocab(
-              Vocab(
-                id: vocab.id,
-                deckId: vocab.deckId,
-                term: termController.text.trim(),
-                translation: translationController.text.trim(),
-                exampleSentence: exampleController.text.trim().isEmpty
-                    ? null
-                    : exampleController.text.trim(),
-                imageUrl: vocab.imageUrl,
-                createdAt: vocab.createdAt,
-              ),
+    if (!context.mounted) return;
+    await runGuarded(
+      context,
+      () => ref.read(vocabRepositoryProvider).updateVocab(
+            Vocab(
+              id: vocab.id,
+              deckId: vocab.deckId,
+              term: result.term,
+              translation: result.translation,
+              exampleSentence: result.exampleSentence,
+              imageUrl: vocab.imageUrl,
+              createdAt: vocab.createdAt,
             ),
-      );
-    }
-  }
-
-  Future<void> _autoTranslate(
-    BuildContext context,
-    WidgetRef ref,
-    TextEditingController termController,
-    TextEditingController translationController,
-  ) async {
-    if (termController.text.trim().isEmpty) return;
-
-    await runGuarded(context, () async {
-      final result = await ref.read(translationServiceProvider).translate(
-            termController.text.trim(),
-            sourceLang: deck.sourceLang,
-            targetLang: deck.targetLang,
-          );
-      if (result != null) {
-        translationController.text = result;
-      }
-    });
+          ),
+    );
   }
 
   Future<void> _exportCsv(BuildContext context, WidgetRef ref) async {
@@ -301,20 +182,135 @@ class DeckDetailScreen extends ConsumerWidget {
       final content = await File(path).readAsString();
       final drafts = VocabCsvCodec.decode(content);
 
-      final vocabRepository = ref.read(vocabRepositoryProvider);
-      for (final draft in drafts) {
-        await vocabRepository.addVocab(
-          deckId: deck.id,
-          term: draft.term,
-          translation: draft.translation,
-          exampleSentence: draft.exampleSentence,
-        );
-      }
+      await ref.read(vocabRepositoryProvider).addVocabsBatch(
+            deck.id,
+            [
+              for (final draft in drafts)
+                (
+                  term: draft.term,
+                  translation: draft.translation,
+                  exampleSentence: draft.exampleSentence,
+                ),
+            ],
+          );
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${drafts.length} Vokabeln importiert')),
       );
+    });
+  }
+}
+
+/// Eigenes StatefulWidget statt lokal erzeugter TextEditingController im
+/// Dialog-Aufrufer: showDialog liefert sein Ergebnis bereits waehrend die
+/// Schliess-Animation noch laeuft, ein manuelles dispose() direkt danach
+/// wuerde die Controller vorzeitig entsorgen ("used after being disposed").
+/// Als State-Feld uebernimmt Flutter das Timing korrekt.
+class _VocabFormDialog extends ConsumerStatefulWidget {
+  const _VocabFormDialog({
+    required this.deck,
+    required this.title,
+    required this.confirmLabel,
+    this.initialTerm = '',
+    this.initialTranslation = '',
+    this.initialExample = '',
+  });
+
+  final Deck deck;
+  final String title;
+  final String confirmLabel;
+  final String initialTerm;
+  final String initialTranslation;
+  final String initialExample;
+
+  @override
+  ConsumerState<_VocabFormDialog> createState() => _VocabFormDialogState();
+}
+
+class _VocabFormDialogState extends ConsumerState<_VocabFormDialog> {
+  late final _termController = TextEditingController(text: widget.initialTerm);
+  late final _translationController =
+      TextEditingController(text: widget.initialTranslation);
+  late final _exampleController = TextEditingController(text: widget.initialExample);
+
+  @override
+  void dispose() {
+    _termController.dispose();
+    _translationController.dispose();
+    _exampleController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _termController,
+            decoration: const InputDecoration(labelText: 'Wort'),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _translationController,
+                  decoration: const InputDecoration(labelText: 'Übersetzung'),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.translate),
+                tooltip: 'Automatisch übersetzen',
+                onPressed: _autoTranslate,
+              ),
+            ],
+          ),
+          TextField(
+            controller: _exampleController,
+            decoration: const InputDecoration(labelText: 'Beispielsatz (optional)'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        TextButton(
+          onPressed: () {
+            final term = _termController.text.trim();
+            final translation = _translationController.text.trim();
+            if (term.isEmpty || translation.isEmpty) return;
+            Navigator.of(context).pop((
+              term: term,
+              translation: translation,
+              exampleSentence: _exampleController.text.trim().isEmpty
+                  ? null
+                  : _exampleController.text.trim(),
+            ));
+          },
+          child: Text(widget.confirmLabel),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _autoTranslate() async {
+    final term = _termController.text.trim();
+    if (term.isEmpty) return;
+
+    await runGuarded(context, () async {
+      final result = await ref.read(translationServiceProvider).translate(
+            term,
+            sourceLang: widget.deck.sourceLang,
+            targetLang: widget.deck.targetLang,
+          );
+      if (result != null) {
+        _translationController.text = result;
+      }
     });
   }
 }

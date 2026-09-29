@@ -22,6 +22,39 @@ class DriftVocabRepository implements VocabRepository {
     required String term,
     required String translation,
     String? exampleSentence,
+  }) {
+    return _insertVocabWithProgress(
+      deckId: deckId,
+      term: term,
+      translation: translation,
+      exampleSentence: exampleSentence,
+    );
+  }
+
+  @override
+  Future<void> addVocabsBatch(
+    int deckId,
+    List<({String term, String translation, String? exampleSentence})> entries,
+  ) {
+    // Eine Transaktion statt N Einzel-Commits: schneller bei grossen
+    // Imports und atomar (entweder alle Zeilen landen in der DB oder keine).
+    return _db.transaction(() async {
+      for (final entry in entries) {
+        await _insertVocabWithProgress(
+          deckId: deckId,
+          term: entry.term,
+          translation: entry.translation,
+          exampleSentence: entry.exampleSentence,
+        );
+      }
+    });
+  }
+
+  Future<int> _insertVocabWithProgress({
+    required int deckId,
+    required String term,
+    required String translation,
+    String? exampleSentence,
   }) async {
     final vocabId = await _db.into(_db.vocabs).insert(
           VocabsCompanion.insert(

@@ -8,6 +8,8 @@ import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
 import 'deck_detail_screen.dart';
 
+typedef _DeckFormResult = ({String name, String sourceLang, String targetLang});
+
 class DeckListScreen extends ConsumerWidget {
   const DeckListScreen({super.key});
 
@@ -85,55 +87,21 @@ class DeckListScreen extends ConsumerWidget {
   }
 
   Future<void> _showCreateDialog(BuildContext context, WidgetRef ref) async {
-    final nameController = TextEditingController();
-    final sourceController = TextEditingController(text: 'de');
-    final targetController = TextEditingController(text: 'en');
-
-    final created = await showDialog<bool>(
+    final result = await showDialog<_DeckFormResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Neues Deck'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: sourceController,
-              decoration: const InputDecoration(labelText: 'Ausgangssprache'),
-            ),
-            TextField(
-              controller: targetController,
-              decoration: const InputDecoration(labelText: 'Zielsprache'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Anlegen'),
-          ),
-        ],
-      ),
+      builder: (_) => const _DeckFormDialog(title: 'Neues Deck', confirmLabel: 'Anlegen'),
     );
+    if (result == null) return;
 
-    if (created == true && nameController.text.trim().isNotEmpty) {
-      if (!context.mounted) return;
-      await runGuarded(
-        context,
-        () => ref.read(deckRepositoryProvider).createDeck(
-              name: nameController.text.trim(),
-              sourceLang: sourceController.text.trim(),
-              targetLang: targetController.text.trim(),
-            ),
-      );
-    }
+    if (!context.mounted) return;
+    await runGuarded(
+      context,
+      () => ref.read(deckRepositoryProvider).createDeck(
+            name: result.name,
+            sourceLang: result.sourceLang,
+            targetLang: result.targetLang,
+          ),
+    );
   }
 
   Future<void> _showRenameDialog(
@@ -141,32 +109,107 @@ class DeckListScreen extends ConsumerWidget {
     WidgetRef ref,
     Deck deck,
   ) async {
-    final controller = TextEditingController(text: deck.name);
-
-    final confirmed = await showDialog<bool>(
+    final result = await showDialog<_DeckFormResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Deck umbenennen'),
-        content: TextField(controller: controller),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Abbrechen'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Speichern'),
-          ),
-        ],
+      builder: (_) => _DeckFormDialog(
+        initialName: deck.name,
+        initialSourceLang: deck.sourceLang,
+        initialTargetLang: deck.targetLang,
+        title: 'Deck umbenennen',
+        confirmLabel: 'Speichern',
+        showLanguageFields: false,
       ),
     );
+    if (result == null) return;
 
-    if (confirmed == true && controller.text.trim().isNotEmpty) {
-      if (!context.mounted) return;
-      await runGuarded(
-        context,
-        () => ref.read(deckRepositoryProvider).renameDeck(deck.id, controller.text.trim()),
-      );
-    }
+    if (!context.mounted) return;
+    await runGuarded(
+      context,
+      () => ref.read(deckRepositoryProvider).renameDeck(deck.id, result.name),
+    );
+  }
+}
+
+/// Eigenes StatefulWidget statt lokal erzeugter TextEditingController im
+/// Dialog-Aufrufer: showDialog liefert sein Ergebnis bereits waehrend die
+/// Schliess-Animation noch laeuft, ein manuelles dispose() direkt danach
+/// wuerde die Controller vorzeitig entsorgen ("used after being disposed").
+/// Als State-Feld uebernimmt Flutter das Timing korrekt.
+class _DeckFormDialog extends StatefulWidget {
+  const _DeckFormDialog({
+    required this.title,
+    required this.confirmLabel,
+    this.initialName = '',
+    this.initialSourceLang = 'de',
+    this.initialTargetLang = 'en',
+    this.showLanguageFields = true,
+  });
+
+  final String title;
+  final String confirmLabel;
+  final String initialName;
+  final String initialSourceLang;
+  final String initialTargetLang;
+  final bool showLanguageFields;
+
+  @override
+  State<_DeckFormDialog> createState() => _DeckFormDialogState();
+}
+
+class _DeckFormDialogState extends State<_DeckFormDialog> {
+  late final _nameController = TextEditingController(text: widget.initialName);
+  late final _sourceController = TextEditingController(text: widget.initialSourceLang);
+  late final _targetController = TextEditingController(text: widget.initialTargetLang);
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _sourceController.dispose();
+    _targetController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(labelText: 'Name'),
+          ),
+          if (widget.showLanguageFields) ...[
+            TextField(
+              controller: _sourceController,
+              decoration: const InputDecoration(labelText: 'Ausgangssprache'),
+            ),
+            TextField(
+              controller: _targetController,
+              decoration: const InputDecoration(labelText: 'Zielsprache'),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Abbrechen'),
+        ),
+        TextButton(
+          onPressed: () {
+            final name = _nameController.text.trim();
+            if (name.isEmpty) return;
+            Navigator.of(context).pop((
+              name: name,
+              sourceLang: _sourceController.text.trim(),
+              targetLang: _targetController.text.trim(),
+            ));
+          },
+          child: Text(widget.confirmLabel),
+        ),
+      ],
+    );
   }
 }

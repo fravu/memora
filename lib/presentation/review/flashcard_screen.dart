@@ -18,6 +18,7 @@ class FlashcardScreen extends ConsumerStatefulWidget {
 
 class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   bool _flipped = false;
+  bool _rating = false;
   int? _lastVocabId;
 
   @override
@@ -129,16 +130,22 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   Widget _ratingButton(String label, Color color, VoidCallback onPressed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(backgroundColor: color, foregroundColor: Colors.white),
-      onPressed: onPressed,
+      onPressed: _rating ? null : onPressed,
       child: Text(label),
     );
   }
 
   Future<void> _rate(Vocab vocab, ReviewRating rating) async {
+    // Verhindert, dass ein Doppel-Tap dieselbe Bewertung zweimal einreicht
+    // (siehe Decision Log zur Stats-Race-Condition).
+    if (_rating) return;
+    setState(() => _rating = true);
     await runGuarded(
       context,
       () => ref.read(reviewVocabUseCaseProvider).call(vocab.id, rating),
     );
+    if (!mounted) return;
+    setState(() => _rating = false);
   }
 
   Future<void> _speak(Vocab vocab) async {

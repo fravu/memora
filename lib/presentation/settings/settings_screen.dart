@@ -23,6 +23,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _load() async {
     final time = await ref.read(settingsRepositoryProvider).getReminderTime();
+    if (!mounted) return;
     setState(() {
       _reminderTime = time;
       _loading = false;
@@ -73,6 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       await ref
           .read(notificationServiceProvider)
           .scheduleDailyReminder(hour: picked.hour, minute: picked.minute);
+      if (!mounted) return;
       setState(() => _reminderTime = (picked.hour, picked.minute));
     });
   }
@@ -81,6 +83,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await runGuarded(context, () async {
       await ref.read(settingsRepositoryProvider).clearReminderTime();
       await ref.read(notificationServiceProvider).cancelReminder();
+      if (!mounted) return;
       setState(() => _reminderTime = null);
     });
   }

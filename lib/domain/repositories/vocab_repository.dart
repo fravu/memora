@@ -13,4 +13,11 @@ abstract class VocabRepository {
   Future<void> updateVocab(Vocab vocab);
 
   Future<void> deleteVocab(int id);
+
+  /// Fuegt mehrere Vokabeln in einer einzigen Transaktion ein (z.B. fuer
+  /// CSV-Import) statt jede einzeln zu committen.
+  Future<void> addVocabsBatch(
+    int deckId,
+    List<({String term, String translation, String? exampleSentence})> entries,
+  );
 }

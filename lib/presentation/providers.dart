@@ -75,8 +75,11 @@ final reviewVocabUseCaseProvider = Provider<ReviewVocabUseCase>((ref) {
   );
 });
 
+// autoDispose sorgt dafuer, dass beim erneuten Betreten des Review-Screens
+// ein frischer "asOf"-Zeitpunkt erfasst wird, statt ihn fuer die gesamte
+// App-Laufzeit einzufrieren (siehe Decision Log).
 final dueVocabsForDeckProvider =
-    StreamProvider.family<List<Vocab>, int>((ref, deckId) {
+    StreamProvider.autoDispose.family<List<Vocab>, int>((ref, deckId) {
   return ref
       .watch(cardProgressRepositoryProvider)
       .watchDueVocabs(deckId, asOf: DateTime.now());

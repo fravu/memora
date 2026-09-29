@@ -33,7 +33,7 @@ class CardProgresses extends Table {
 
 class StatsSnapshots extends Table {
   IntColumn get id => integer().autoIncrement()();
-  DateTimeColumn get date => dateTime()();
+  DateTimeColumn get date => dateTime().unique()();
   IntColumn get cardsReviewed => integer().withDefault(const Constant(0))();
   IntColumn get correctCount => integer().withDefault(const Constant(0))();
   IntColumn get streakDay => integer().withDefault(const Constant(0))();

@@ -11,38 +11,43 @@ class DriftStatsRepository implements StatsRepository {
 
   @override
   Future<void> recordReview({required bool wasCorrect}) async {
-    final today = _dateOnly(DateTime.now());
-    final existing = await (_db.select(_db.statsSnapshots)
-          ..where((s) => s.date.equals(today)))
-        .getSingleOrNull();
+    // Transaktion, damit ein paralleler Aufruf (z.B. Doppel-Tap auf einen
+    // Bewertungsknopf) nicht zwei Zeilen fuer denselben Tag anlegt (siehe
+    // Decision Log).
+    await _db.transaction(() async {
+      final today = _dateOnly(DateTime.now());
+      final existing = await (_db.select(_db.statsSnapshots)
+            ..where((s) => s.date.equals(today)))
+          .getSingleOrNull();
 
-    if (existing != null) {
-      await (_db.update(_db.statsSnapshots)
-            ..where((s) => s.id.equals(existing.id)))
-          .write(
-        StatsSnapshotsCompanion(
-          cardsReviewed: Value(existing.cardsReviewed + 1),
-          correctCount:
-              Value(existing.correctCount + (wasCorrect ? 1 : 0)),
-        ),
-      );
-      return;
-    }
-
-    final yesterday = today.subtract(const Duration(days: 1));
-    final yesterdaySnapshot = await (_db.select(_db.statsSnapshots)
-          ..where((s) => s.date.equals(yesterday)))
-        .getSingleOrNull();
-    final newStreak = (yesterdaySnapshot?.streakDay ?? 0) + 1;
-
-    await _db.into(_db.statsSnapshots).insert(
-          StatsSnapshotsCompanion.insert(
-            date: today,
-            cardsReviewed: const Value(1),
-            correctCount: Value(wasCorrect ? 1 : 0),
-            streakDay: Value(newStreak),
+      if (existing != null) {
+        await (_db.update(_db.statsSnapshots)
+              ..where((s) => s.id.equals(existing.id)))
+            .write(
+          StatsSnapshotsCompanion(
+            cardsReviewed: Value(existing.cardsReviewed + 1),
+            correctCount:
+                Value(existing.correctCount + (wasCorrect ? 1 : 0)),
           ),
         );
+        return;
+      }
+
+      final yesterday = today.subtract(const Duration(days: 1));
+      final yesterdaySnapshot = await (_db.select(_db.statsSnapshots)
+            ..where((s) => s.date.equals(yesterday)))
+          .getSingleOrNull();
+      final newStreak = (yesterdaySnapshot?.streakDay ?? 0) + 1;
+
+      await _db.into(_db.statsSnapshots).insert(
+            StatsSnapshotsCompanion.insert(
+              date: today,
+              cardsReviewed: const Value(1),
+              correctCount: Value(wasCorrect ? 1 : 0),
+              streakDay: Value(newStreak),
+            ),
+          );
+    });
   }
 
   @override

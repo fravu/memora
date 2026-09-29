@@ -1316,6 +1316,7 @@ class $StatsSnapshotsTable extends StatsSnapshots
     false,
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _cardsReviewedMeta = const VerificationMeta(
     'cardsReviewed',

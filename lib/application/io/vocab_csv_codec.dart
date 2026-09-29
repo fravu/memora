@@ -35,11 +35,15 @@ class VocabCsvCodec {
     final rows = Csv().decode(csv);
     if (rows.isEmpty) return [];
 
+    // Nur ueberspringen, wenn die ersten beiden Zellen exakt der Kopfzeile
+    // entsprechen — sonst wuerde eine echte Vokabel "term" (z.B. Englisch
+    // fuer "Begriff") faelschlich als Header erkannt und verworfen.
     var dataRows = rows;
-    final firstCell = rows.first.isNotEmpty
-        ? rows.first.first.toString().trim().toLowerCase()
-        : '';
-    if (firstCell == 'term') {
+    final firstRow = rows.first;
+    final looksLikeHeader = firstRow.length >= 2 &&
+        firstRow[0].toString().trim().toLowerCase() == 'term' &&
+        firstRow[1].toString().trim().toLowerCase() == 'translation';
+    if (looksLikeHeader) {
       dataRows = rows.skip(1).toList();
     }
 
