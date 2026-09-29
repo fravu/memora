@@ -7,6 +7,13 @@ bewusst in eine spätere Phase verschoben.
 
 Status-Legende: ⬜ offen · 🟨 in Arbeit · ✅ erledigt
 
+**Stand 2026-09-29:** Phase 0–3 vollständig, Phase 4 (Polish/Store-Vorbereitung) bis auf
+die eigentliche Store-Submission fertig, aus Phase 5 Auto-Übersetzung und CSV-Import/
+Export umgesetzt. Im Anschluss lief ein Code-Review (`/code-review --level high`) über
+die gesamte Implementierung; alle 7 gefundenen Probleme (Race Conditions, ein
+eingefrorener Zeitstempel, Zeitzonen-Rundung, fehlende Transaktionen, ein Dispose-Timing-
+Bug) sind behoben und mit dem vollen Testlauf (52 Tests) + Debug-Build verifiziert.
+
 ## Phase 0 – Setup & Architektur (Fundament)
 **Ziel:** Projekt lauffähig, Architektur & Datenmodell stehen.
 
