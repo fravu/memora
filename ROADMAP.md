@@ -76,17 +76,26 @@ für XP-Formel, Streak-Logik und die drei neuen/geänderten Screens.
 
 ---
 
-## Phase 4 – Polish & Store-Release
+## Phase 4 – Polish & Store-Release-Vorbereitung 🟨
 **Ziel:** Veröffentlichungsreife für Play Store & App Store.
 
-- ⬜ Onboarding-Flow (erstes Deck anlegen, kurze Erklärung SRS)
-- ⬜ App-Icon, Splash Screen, Dark Mode
-- ⬜ Fehlerbehandlung / Empty States (kein Deck, keine fälligen Karten)
-- ⬜ Store-Metadaten (Screenshots, Beschreibung), Privacy-Policy (lokal-only → einfach)
-- ⬜ Beta-Test (TestFlight / Play Internal Testing)
+- ✅ Onboarding-Flow (3 Seiten: Begrüßung, SRS-Erklärung, Los geht's → Deck-Liste)
+- ✅ App-Icon (Platzhalter, generiert), Splash Screen (`flutter_native_splash`), Dark Mode (`ThemeMode.system`)
+- ✅ Fehlerbehandlung: alle Repository-Aufrufe aus der UI laufen über `runGuarded`
+  (zeigt Fehler als SnackBar statt Absturz); Empty States waren bereits seit
+  Phase 1–3 auf allen Screens vorhanden
+- ✅ Store-Metadaten-Entwürfe (`store/play_store_listing.md`, `store/app_store_listing.md`,
+  `store/privacy_policy.md`) und Signing-Config-Vorlage (`android/key.properties.example`)
+- ⬜ **Bewusst nicht erledigt:** Beta-Test (TestFlight/Play Internal Testing) und
+  tatsächliche Store-Submission — erfordert deine Play-Console-/Apple-Developer-Accounts,
+  Zahlungsdaten und für iOS einen Mac mit Xcode (nicht von dieser Linux-Umgebung aus möglich).
+  Bleibt ein expliziter, gemeinsamer Schritt.
 
 **Deliverable:** App ist im Play Store & App Store live.
 **Aufwand:** 🟡 Mittel (viel Detailarbeit, wenig technisches Risiko)
+**Offene TODOs vor echter Veröffentlichung:** echtes App-Icon/Branding statt
+Platzhalter, Screenshots, gehostete Privacy-Policy-URL, iOS-Build auf einem Mac,
+Upload-Keystore erzeugen (`android/key.properties.example` → `key.properties`).
 
 ---
 

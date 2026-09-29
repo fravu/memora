@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/deck.dart';
 import '../../domain/entities/review_rating.dart';
 import '../../domain/entities/vocab.dart';
+import '../common/run_guarded.dart';
 import '../providers.dart';
 
 class FlashcardScreen extends ConsumerStatefulWidget {
@@ -134,12 +135,18 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   Future<void> _rate(Vocab vocab, ReviewRating rating) async {
-    await ref.read(reviewVocabUseCaseProvider).call(vocab.id, rating);
+    await runGuarded(
+      context,
+      () => ref.read(reviewVocabUseCaseProvider).call(vocab.id, rating),
+    );
   }
 
   Future<void> _speak(Vocab vocab) async {
     final text = _flipped ? vocab.translation : vocab.term;
     final languageCode = _flipped ? widget.deck.targetLang : widget.deck.sourceLang;
-    await ref.read(ttsServiceProvider).speak(text, languageCode: languageCode);
+    await runGuarded(
+      context,
+      () => ref.read(ttsServiceProvider).speak(text, languageCode: languageCode),
+    );
   }
 }

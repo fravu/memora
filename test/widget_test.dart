@@ -5,13 +5,18 @@ import 'package:memora/data/drift/database.dart';
 import 'package:memora/main.dart';
 import 'package:memora/presentation/providers.dart';
 
+import 'fakes/fake_settings_repository.dart';
+
 void main() {
   testWidgets('Deck-Liste zeigt Leerzustand ohne Decks', (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [appDatabaseProvider.overrideWith((ref) => db)],
+        overrides: [
+          appDatabaseProvider.overrideWith((ref) => db),
+          settingsRepositoryProvider.overrideWith((ref) => FakeSettingsRepository()),
+        ],
         child: const MemoraApp(),
       ),
     );

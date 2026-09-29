@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../common/run_guarded.dart';
 import '../providers.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -65,21 +66,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         : TimeOfDay(hour: _reminderTime!.$1, minute: _reminderTime!.$2);
 
     final picked = await showTimePicker(context: context, initialTime: initial);
-    if (picked == null) return;
+    if (picked == null || !mounted) return;
 
-    await ref
-        .read(settingsRepositoryProvider)
-        .setReminderTime(picked.hour, picked.minute);
-    await ref
-        .read(notificationServiceProvider)
-        .scheduleDailyReminder(hour: picked.hour, minute: picked.minute);
-
-    setState(() => _reminderTime = (picked.hour, picked.minute));
+    await runGuarded(context, () async {
+      await ref.read(settingsRepositoryProvider).setReminderTime(picked.hour, picked.minute);
+      await ref
+          .read(notificationServiceProvider)
+          .scheduleDailyReminder(hour: picked.hour, minute: picked.minute);
+      setState(() => _reminderTime = (picked.hour, picked.minute));
+    });
   }
 
   Future<void> _clearReminder() async {
-    await ref.read(settingsRepositoryProvider).clearReminderTime();
-    await ref.read(notificationServiceProvider).cancelReminder();
-    setState(() => _reminderTime = null);
+    await runGuarded(context, () async {
+      await ref.read(settingsRepositoryProvider).clearReminderTime();
+      await ref.read(notificationServiceProvider).cancelReminder();
+      setState(() => _reminderTime = null);
+    });
   }
 }

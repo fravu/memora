@@ -4,6 +4,7 @@ import '../../domain/repositories/settings_repository.dart';
 
 const _hourKey = 'reminder_hour';
 const _minuteKey = 'reminder_minute';
+const _onboardingCompleteKey = 'onboarding_complete';
 
 class SharedPrefsSettingsRepository implements SettingsRepository {
   @override
@@ -27,5 +28,17 @@ class SharedPrefsSettingsRepository implements SettingsRepository {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_hourKey);
     await prefs.remove(_minuteKey);
+  }
+
+  @override
+  Future<bool> hasCompletedOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingCompleteKey) ?? false;
+  }
+
+  @override
+  Future<void> setOnboardingComplete() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompleteKey, true);
   }
 }

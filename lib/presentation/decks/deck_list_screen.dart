@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/deck.dart';
+import '../common/run_guarded.dart';
 import '../providers.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
@@ -58,7 +59,10 @@ class DeckListScreen extends ConsumerWidget {
                     if (value == 'rename') {
                       await _showRenameDialog(context, ref, deck);
                     } else if (value == 'delete') {
-                      await ref.read(deckRepositoryProvider).deleteDeck(deck.id);
+                      await runGuarded(
+                        context,
+                        () => ref.read(deckRepositoryProvider).deleteDeck(deck.id),
+                      );
                     }
                   },
                   itemBuilder: (_) => const [
@@ -120,11 +124,15 @@ class DeckListScreen extends ConsumerWidget {
     );
 
     if (created == true && nameController.text.trim().isNotEmpty) {
-      await ref.read(deckRepositoryProvider).createDeck(
-            name: nameController.text.trim(),
-            sourceLang: sourceController.text.trim(),
-            targetLang: targetController.text.trim(),
-          );
+      if (!context.mounted) return;
+      await runGuarded(
+        context,
+        () => ref.read(deckRepositoryProvider).createDeck(
+              name: nameController.text.trim(),
+              sourceLang: sourceController.text.trim(),
+              targetLang: targetController.text.trim(),
+            ),
+      );
     }
   }
 
@@ -154,9 +162,11 @@ class DeckListScreen extends ConsumerWidget {
     );
 
     if (confirmed == true && controller.text.trim().isNotEmpty) {
-      await ref
-          .read(deckRepositoryProvider)
-          .renameDeck(deck.id, controller.text.trim());
+      if (!context.mounted) return;
+      await runGuarded(
+        context,
+        () => ref.read(deckRepositoryProvider).renameDeck(deck.id, controller.text.trim()),
+      );
     }
   }
 }

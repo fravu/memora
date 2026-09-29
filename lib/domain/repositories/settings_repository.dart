@@ -5,4 +5,8 @@ abstract class SettingsRepository {
   Future<void> setReminderTime(int hour, int minute);
 
   Future<void> clearReminderTime();
+
+  Future<bool> hasCompletedOnboarding();
+
+  Future<void> setOnboardingComplete();
 }

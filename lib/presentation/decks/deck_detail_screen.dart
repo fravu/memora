@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/deck.dart';
 import '../../domain/entities/vocab.dart';
+import '../common/run_guarded.dart';
 import '../providers.dart';
 import '../review/flashcard_screen.dart';
 
@@ -34,8 +35,10 @@ class DeckDetailScreen extends ConsumerWidget {
                 onTap: () => _showEditDialog(context, ref, vocab),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
-                  onPressed: () =>
-                      ref.read(vocabRepositoryProvider).deleteVocab(vocab.id),
+                  onPressed: () => runGuarded(
+                    context,
+                    () => ref.read(vocabRepositoryProvider).deleteVocab(vocab.id),
+                  ),
                 ),
               );
             },
@@ -113,14 +116,18 @@ class DeckDetailScreen extends ConsumerWidget {
     if (created == true &&
         termController.text.trim().isNotEmpty &&
         translationController.text.trim().isNotEmpty) {
-      await ref.read(vocabRepositoryProvider).addVocab(
-            deckId: deck.id,
-            term: termController.text.trim(),
-            translation: translationController.text.trim(),
-            exampleSentence: exampleController.text.trim().isEmpty
-                ? null
-                : exampleController.text.trim(),
-          );
+      if (!context.mounted) return;
+      await runGuarded(
+        context,
+        () => ref.read(vocabRepositoryProvider).addVocab(
+              deckId: deck.id,
+              term: termController.text.trim(),
+              translation: translationController.text.trim(),
+              exampleSentence: exampleController.text.trim().isEmpty
+                  ? null
+                  : exampleController.text.trim(),
+            ),
+      );
     }
   }
 
@@ -172,19 +179,23 @@ class DeckDetailScreen extends ConsumerWidget {
     );
 
     if (saved == true) {
-      await ref.read(vocabRepositoryProvider).updateVocab(
-            Vocab(
-              id: vocab.id,
-              deckId: vocab.deckId,
-              term: termController.text.trim(),
-              translation: translationController.text.trim(),
-              exampleSentence: exampleController.text.trim().isEmpty
-                  ? null
-                  : exampleController.text.trim(),
-              imageUrl: vocab.imageUrl,
-              createdAt: vocab.createdAt,
+      if (!context.mounted) return;
+      await runGuarded(
+        context,
+        () => ref.read(vocabRepositoryProvider).updateVocab(
+              Vocab(
+                id: vocab.id,
+                deckId: vocab.deckId,
+                term: termController.text.trim(),
+                translation: translationController.text.trim(),
+                exampleSentence: exampleController.text.trim().isEmpty
+                    ? null
+                    : exampleController.text.trim(),
+                imageUrl: vocab.imageUrl,
+                createdAt: vocab.createdAt,
+              ),
             ),
-          );
+      );
     }
   }
 }

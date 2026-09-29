@@ -88,3 +88,7 @@ final gamificationSummaryProvider = Provider<AsyncValue<GamificationSummary>>((r
   final history = ref.watch(statsHistoryProvider);
   return history.whenData(GamificationSummary.fromHistory);
 });
+
+final onboardingCompleteProvider = FutureProvider<bool>((ref) {
+  return ref.watch(settingsRepositoryProvider).hasCompletedOnboarding();
+});
